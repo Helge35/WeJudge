@@ -23,7 +23,7 @@ namespace WeJudgeHost
 
         public void ConfigureServices(IServiceCollection services)
         {
-            Bootstrapper.Register(services);
+            Bootstrapper.Register(services, Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,8 +34,7 @@ namespace WeJudgeHost
                 app.UseDeveloperExceptionPage();
             }
 
-            EntitiesMapper.Map();
-
+            app.UseAuthentication();
             app.UseMvc();
         }
     }
