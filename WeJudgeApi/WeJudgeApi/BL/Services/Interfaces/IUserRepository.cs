@@ -6,7 +6,7 @@ using WeJudgeApi.BL.Dal.Entities;
 
 namespace WeJudgeApi.BL.Services.Interfaces
 {
-   public interface IUserService
+   public interface IUserRepository
     {
 
         User Authenticate(string username, string password);

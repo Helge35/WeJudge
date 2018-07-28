@@ -1,29 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using WeJudgeApi.BL.Dal;
 using WeJudgeApi.BL.Dal.Entities;
 using WeJudgeApi.BL.Services.Helpers;
 using WeJudgeApi.BL.Services.Interfaces;
 
-namespace WeJudgeApi.BL.Services
+namespace WeJudgeApi.BL.Dal
 {
-    public class UserService : IUserService
+    public class UserRepository : IUserRepository
     {
         private DataContext _context;
 
-        public UserService(DataContext context)
+        public UserRepository(DataContext context)
         {
             _context = context;
         }
 
-        public User Authenticate(string username, string password)
+        public User Authenticate(string UserName, string password)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(password))
                 return null;
 
-            var user = _context.Users.SingleOrDefault(x => x.Username == username);
+            var user = _context.Users.SingleOrDefault(x => x.UserName == UserName);
 
             if (user == null)
                 return null;
@@ -49,8 +47,8 @@ namespace WeJudgeApi.BL.Services
             if (string.IsNullOrWhiteSpace(password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Username == user.Username))
-                throw new AppException("Username \"" + user.Username + "\" is already taken");
+            if (_context.Users.Any(x => x.UserName == user.UserName))
+                throw new AppException("UserName \"" + user.UserName + "\" is already taken");
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -71,15 +69,15 @@ namespace WeJudgeApi.BL.Services
             if (user == null)
                 throw new AppException("User not found");
 
-            if (userParam.Username != user.Username)
+            if (userParam.UserName != user.UserName)
             {
-                if (_context.Users.Any(x => x.Username == userParam.Username))
-                    throw new AppException("Username " + userParam.Username + " is already taken");
+                if (_context.Users.Any(x => x.UserName == userParam.UserName))
+                    throw new AppException("UserName " + userParam.UserName + " is already taken");
             }
 
             user.FirstName = userParam.FirstName;
             user.LastName = userParam.LastName;
-            user.Username = userParam.Username;
+            user.UserName = userParam.UserName;
 
             if (!string.IsNullOrWhiteSpace(password))
             {

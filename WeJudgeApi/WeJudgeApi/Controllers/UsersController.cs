@@ -20,11 +20,11 @@ namespace WeJudgeApi.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private IUserService _userService;
+        private IUserRepository _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
-        public UsersController( IUserService userService, IMapper mapper, IOptions<AppSettings> appSettings)
+        public UsersController( IUserRepository userService, IMapper mapper, IOptions<AppSettings> appSettings)
         {
             _userService = userService;
             _mapper = mapper;
@@ -58,7 +58,7 @@ namespace WeJudgeApi.Controllers
             return Ok(new
             {
                 Id = user.Id,
-                Username = user.Username,
+                Username = user.UserName,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Token = tokenString

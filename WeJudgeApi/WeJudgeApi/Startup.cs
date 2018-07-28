@@ -50,7 +50,7 @@ namespace WeJudgeApi
                  {
                      OnTokenValidated = context =>
                      {
-                         var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                         var userService = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
                          var userId = int.Parse(context.Principal.Identity.Name);
                          var user = userService.GetById(userId);
                          if (user == null)
@@ -72,7 +72,7 @@ namespace WeJudgeApi
                  };
              });
 
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserRepository, UserRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

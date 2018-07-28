@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WeJudgeApi.BL.Dal.Entities;
 
 namespace WeJudgeApi.BL.Dal
