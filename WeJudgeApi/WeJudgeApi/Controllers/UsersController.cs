@@ -1,32 +1,30 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using WeJudgeHost.BL.Dal;
-using WeJudgeHost.BL.Dal.Entities;
-using WeJudgeHost.BL.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using WeJudgeApi.BL.Dal.Entities;
+using WeJudgeApi.BL.Models;
+using WeJudgeApi.BL.Services.Helpers;
+using WeJudgeApi.BL.Services.Interfaces;
 
-namespace WeJudgeHost.Controllers
+namespace WeJudgeApi.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : Controller
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
     {
-        private UserRepository _userService;
+        private IUserService _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
 
-        public UsersController(
-            UserRepository userService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+        public UsersController( IUserService userService, IMapper mapper, IOptions<AppSettings> appSettings)
         {
             _userService = userService;
             _mapper = mapper;
@@ -35,9 +33,9 @@ namespace WeJudgeHost.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate(LoginModel userDto)
+        public IActionResult Authenticate([FromBody]UserModel UserModel)
         {
-            var user = _userService.Authenticate(userDto.Email, userDto.Password);
+            var user = _userService.Authenticate(UserModel.Username, UserModel.Password);
 
             if (user == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
@@ -60,7 +58,7 @@ namespace WeJudgeHost.Controllers
             return Ok(new
             {
                 Id = user.Id,
-                Username = user.Email,
+                Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Token = tokenString
@@ -69,20 +67,17 @@ namespace WeJudgeHost.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register(RegistrationUserModel userDto)
+        public IActionResult Register([FromBody]UserModel UserModel)
         {
-            // map dto to entity
-            var user = _mapper.Map<User>(userDto);
+            var user = _mapper.Map<User>(UserModel);
 
             try
             {
-                // save 
-                _userService.Create(user, userDto.Password);
+                _userService.Create(user, UserModel.Password);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (AppException ex)
             {
-                // return error message if there was an exception
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -91,34 +86,31 @@ namespace WeJudgeHost.Controllers
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
-            var userDtos = _mapper.Map<IList<UserModel>>(users);
-            return Ok(userDtos);
+            var UserModels = _mapper.Map<IList<UserModel>>(users);
+            return Ok(UserModels);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             var user = _userService.GetById(id);
-            var userDto = _mapper.Map<UserModel>(user);
-            return Ok(userDto);
+            var UserModel = _mapper.Map<UserModel>(user);
+            return Ok(UserModel);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(string id, UserModel userDto)
+        public IActionResult Update(int id, [FromBody]UserModel UserModel)
         {
-            // map dto to entity and set id
-            var user = _mapper.Map<User>(userDto);
+            var user = _mapper.Map<User>(UserModel);
             user.Id = id;
 
             try
             {
-                // save 
-               // _userService.Update(user, userDto.Password);
+                _userService.Update(user, UserModel.Password);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (AppException ex)
             {
-                // return error message if there was an exception
                 return BadRequest(new { message = ex.Message });
             }
         }
